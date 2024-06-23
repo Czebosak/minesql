@@ -1,17 +1,49 @@
 #![allow(unused)]
 
 use std::fs;
-use std::io::Write;
+use std::io::{stdout, stdin, Write};
 use serialization::*;
+use std::path::Path;
 
 mod serialization;
 mod fileio;
 
 fn main() {
-    let ascii_slice = "Haha funny column".as_bytes();
+    if (!(Path::new("./metadata").exists())) {
+    print!("\nEnter first column name: ");
+    stdout().flush().unwrap();
+    let mut string = String::new();
+    let input = stdin().read_line(&mut string).unwrap();
+
+    print!("\nEnter first column data type: ");
+    stdout().flush().unwrap();
+    let mut string2 = String::new();
+    let input = stdin().read_line(&mut string2).unwrap();
+
+    print!("\nEnter first column data length: ");
+    stdout().flush().unwrap();
+    let mut string3 = String::new();
+    let input = stdin().read_line(&mut string3).unwrap();
+
+    print!("\nEnter second column name: ");
+    stdout().flush().unwrap();
+    let mut string4 = String::new();
+    let input = stdin().read_line(&mut string4).unwrap();
+
+    print!("\nEnter second column data type: ");
+    stdout().flush().unwrap();
+    let mut string5 = String::new();
+    let input = stdin().read_line(&mut string5).unwrap();
+
+    print!("\nEnter second column data length: ");
+    stdout().flush().unwrap();
+    let mut string6 = String::new();
+    let input = stdin().read_line(&mut string6).unwrap();
+
+    let ascii_slice = string.trim().as_bytes();
     let mut ascii_array = [0u8; 32];
 
-    let ascii_slice2 = "Haha crazy column".as_bytes();
+    let ascii_slice2 = string4.trim().as_bytes();
     let mut ascii_array2 = [0u8; 32];
 
     ascii_array[..ascii_slice.len()].copy_from_slice(ascii_slice);
@@ -21,13 +53,13 @@ fn main() {
         columns: vec!(
             Column {
                 name: ascii_array,
-                data_type: 1,
-                length: 2,
+                data_type: string2.trim().parse::<u8>().unwrap(),
+                length: string3.trim().parse::<u16>().unwrap(),
             },
             Column {
                 name: ascii_array2,
-                data_type: 2,
-                length: 4096,
+                data_type: string5.trim().parse::<u8>().unwrap(),
+                length: string6.trim().parse::<u16>().unwrap(),
             },
         )
     };
@@ -42,8 +74,12 @@ fn main() {
     
     file.set_len(0);
     file.write(&serialized);
+    return;
+    }
 
-    let table = deserialize_table(serialized);
+    let data = fs::read("./metadata").unwrap();
+
+    let table = deserialize_table(data);
 
     for (i, column) in table.columns.into_iter().enumerate() {
         println!("\nColumn {}", i+1);
@@ -51,6 +87,7 @@ fn main() {
         println!("  Data type: {} ", column.data_type);
         println!("  Length {}", column.length);
     }
+}
 
 /* #[cfg(test)]
 mod tests {
