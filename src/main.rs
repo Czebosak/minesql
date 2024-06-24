@@ -4,14 +4,15 @@ use std::fs;
 use std::io::{stdout, stdin, Write};
 use std::path::Path;
 use serialization::*;
-use fileio::*;
+use data::new_table;
+//use fileio::*;
 
 mod fileio;
 mod serialization;
 mod data;
 
 fn main() {
-    if !(Path::new("./metadata").exists()) {
+    if !(Path::new("./test.metadata").exists()) {
     print!("\nEnter first column name: ");
     stdout().flush().unwrap();
     let mut string = String::new();
@@ -51,18 +52,31 @@ fn main() {
     ascii_array[..ascii_slice.len()].copy_from_slice(ascii_slice);
     ascii_array2[..ascii_slice2.len()].copy_from_slice(ascii_slice2);
 
-    let table = Table {
+    new_table("test", vec!(
+        Column {
+            name: ascii_array,
+            data_type: string2.trim().parse::<u8>().unwrap(),
+            length: string3.trim().parse::<u32>().unwrap(),
+        },
+        Column {
+            name: ascii_array2,
+            data_type: string5.trim().parse::<u8>().unwrap(),
+            length: string6.trim().parse::<u32>().unwrap(),
+        },
+    ));
+
+/*     let table = Table {
         line_size: 260,
         columns: vec!(
             Column {
                 name: ascii_array,
                 data_type: string2.trim().parse::<u8>().unwrap(),
-                length: string3.trim().parse::<u16>().unwrap(),
+                length: string3.trim().parse::<u32>().unwrap(),
             },
             Column {
                 name: ascii_array2,
                 data_type: string5.trim().parse::<u8>().unwrap(),
-                length: string6.trim().parse::<u16>().unwrap(),
+                length: string6.trim().parse::<u32>().unwrap(),
             },
         )
     };
@@ -70,19 +84,11 @@ fn main() {
     let serialized = serialize_table(table);
     
     write_chunks("metadata", &serialized);
-
-    /*let mut file = fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open("metadata")
-        .unwrap();
-    
-    file.set_len(0);
-    file.write(&serialized);*/
+ */
     return;
     }
 
-    let data = fs::read("./metadata").unwrap();
+    let data = fs::read("./test.metadata").unwrap();
 
     let table = deserialize_table(data);
 
@@ -96,15 +102,3 @@ fn main() {
         println!("      Length {}", column.length);
     }
 }
-
-/* #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
-*/

@@ -1,5 +1,6 @@
 /target
-/metadata
+*.metadata
+*.table
 
 # Added by cargo
 #
