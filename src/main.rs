@@ -10,8 +10,10 @@ use data::new_table;
 mod fileio;
 mod serialization;
 mod data;
+mod ui;
 
 fn main() {
+    ui::main_loop();
     if !(Path::new("./test.metadata").exists()) {
     print!("\nEnter first column name: ");
     stdout().flush().unwrap();
