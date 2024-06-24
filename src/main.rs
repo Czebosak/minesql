@@ -50,6 +50,7 @@ fn main() {
     ascii_array2[..ascii_slice2.len()].copy_from_slice(ascii_slice2);
 
     let table = Table {
+        line_size: 260,
         columns: vec!(
             Column {
                 name: ascii_array,
@@ -81,11 +82,14 @@ fn main() {
 
     let table = deserialize_table(data);
 
+    println!("Table:");
+    println!("  Line size: {}B", table.line_size);
+    println!("  Columns:");
     for (i, column) in table.columns.into_iter().enumerate() {
-        println!("\nColumn {}", i+1);
-        println!("  Name: {} ", String::from_utf8(column.name.to_vec()).unwrap());
-        println!("  Data type: {} ", column.data_type);
-        println!("  Length {}", column.length);
+        println!("    Column {}", i+1);
+        println!("      Name: {} ", String::from_utf8(column.name.to_vec()).unwrap());
+        println!("      Data type: {} ", column.data_type);
+        println!("      Length {}", column.length);
     }
 }
 

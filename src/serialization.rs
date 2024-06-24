@@ -7,11 +7,21 @@ pub struct Column {
 }
 
 pub struct Table {
-    pub columns: Vec<Column>
+    pub line_size: u32,
+    pub columns: Vec<Column>,
 }
 
 pub fn serialize_table(table: Table) -> Vec<u8> {
     let mut data: Vec<u8> = Vec::new();
+
+    let line_size_serialized = [
+        ((table.line_size >> 24) & 0xFF) as u8,
+        ((table.line_size >> 16) & 0xFF) as u8,
+        ((table.line_size >> 8) & 0xFF) as u8,
+        (table.line_size & 0xFF) as u8,
+    ];
+
+    data.extend_from_slice(&line_size_serialized);
 
     for column in table.columns {
         data.extend_from_slice(&column.name);
@@ -24,75 +34,24 @@ pub fn serialize_table(table: Table) -> Vec<u8> {
     return data;
 }
 
-/* pub fn deserialize_table(data: Vec<u8>) {
-    let deserialized_table = Table {
-        columns: Vec::new()
-    };
-    
-    let remaining_data = &data;
-
-    while remaining_data.len() > 0 {
-        let new_data: &Vec<u8>;
-        let column: Column;
-
-        new_data = &remaining_data.split_off(31);
-        column.name[..remaining_data.len()].copy_from_slice(remaining_data);
-
-        let data_iter = new_data.into_iter();
-
-        column.data_type = data_iter.next().unwrap().clone();
-        column.length = (data_iter.next().unwrap().clone() as u16) << 8 | (data_iter.next().unwrap().clone() as u16);
-
-        deserialized_table.columns.push(column);
-        remaining_data = data_iter.collect();
-    }
-
-    return deserialized_table;
-} */
-
-/* pub fn deserialize_table(mut data: Vec<u8>) -> Table {
-    let mut deserialized_table = Table {
-        columns: Vec::new(),
-    };
-
-    while data.len() > 0 {
-        let mut name = [0u8; 32];
-        let remaining_data = data.split_off(31);
-
-        // Copy the column name
-        name.copy_from_slice(&data[..32]);
-
-        // Prepare to read data type and length
-        let mut data_iter = remaining_data.into_iter();
-
-        let data_type = data_iter.next().unwrap();
-        let length = ((data_iter.next().unwrap() as u16) << 8) | (data_iter.next().unwrap() as u16);
-
-        let column = Column {
-            name,
-            data_type,
-            length,
-        };
-
-        deserialized_table.columns.push(column);
-
-        // Collect the remaining data back into the vector
-        data = data_iter.collect();
-    }
-
-    deserialized_table
-} */
-
 pub fn deserialize_table(mut data: Vec<u8>) -> Table {
     let mut deserialized_table = Table {
+        line_size: 0_u32,
         columns: Vec::new(),
     };
 
-    while data.len() > 0 {
-        let mut name = [0u8; 32];
-        let remaining_data = data.split_off(32);
+    let mut column_data = data.split_off(4);
 
-        name.copy_from_slice(&data[..32]);
+    deserialized_table.line_size = (data[0] as u32) << 24
+                | (data[1] as u32) << 16
+                | (data[2] as u32) << 8
+                | (data[3] as u32);
+
+    while column_data.len() > 0 {
+        let mut name = [0_u8; 32];
+        let remaining_data = column_data.split_off(32);
+
+        name.copy_from_slice(&column_data);
 
         let mut data_iter = remaining_data.into_iter();
 
@@ -107,7 +66,7 @@ pub fn deserialize_table(mut data: Vec<u8>) -> Table {
 
         deserialized_table.columns.push(column);
 
-        data = data_iter.collect();
+        column_data = data_iter.collect();
     }
 
     deserialized_table
