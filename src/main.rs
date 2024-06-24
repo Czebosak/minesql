@@ -2,43 +2,45 @@
 
 use std::fs;
 use std::io::{stdout, stdin, Write};
-use serialization::*;
 use std::path::Path;
+use serialization::*;
+use fileio::*;
 
-mod serialization;
 mod fileio;
+mod serialization;
+mod data;
 
 fn main() {
-    if (!(Path::new("./metadata").exists())) {
+    if !(Path::new("./metadata").exists()) {
     print!("\nEnter first column name: ");
     stdout().flush().unwrap();
     let mut string = String::new();
-    let input = stdin().read_line(&mut string).unwrap();
+    let _ = stdin().read_line(&mut string).unwrap();
 
     print!("\nEnter first column data type: ");
     stdout().flush().unwrap();
     let mut string2 = String::new();
-    let input = stdin().read_line(&mut string2).unwrap();
+    let _ = stdin().read_line(&mut string2).unwrap();
 
     print!("\nEnter first column data length: ");
     stdout().flush().unwrap();
     let mut string3 = String::new();
-    let input = stdin().read_line(&mut string3).unwrap();
+    let _ = stdin().read_line(&mut string3).unwrap();
 
     print!("\nEnter second column name: ");
     stdout().flush().unwrap();
     let mut string4 = String::new();
-    let input = stdin().read_line(&mut string4).unwrap();
+    let _ = stdin().read_line(&mut string4).unwrap();
 
     print!("\nEnter second column data type: ");
     stdout().flush().unwrap();
     let mut string5 = String::new();
-    let input = stdin().read_line(&mut string5).unwrap();
+    let _ = stdin().read_line(&mut string5).unwrap();
 
     print!("\nEnter second column data length: ");
     stdout().flush().unwrap();
     let mut string6 = String::new();
-    let input = stdin().read_line(&mut string6).unwrap();
+    let _ = stdin().read_line(&mut string6).unwrap();
 
     let ascii_slice = string.trim().as_bytes();
     let mut ascii_array = [0u8; 32];
@@ -66,15 +68,17 @@ fn main() {
     };
 
     let serialized = serialize_table(table);
+    
+    write_chunks("metadata", &serialized);
 
-    let mut file = fs::OpenOptions::new()
+    /*let mut file = fs::OpenOptions::new()
         .create(true)
         .append(true)
         .open("metadata")
         .unwrap();
     
     file.set_len(0);
-    file.write(&serialized);
+    file.write(&serialized);*/
     return;
     }
 

@@ -1,5 +1,3 @@
-use std::fs::File;
-
 pub struct Column {
     pub name: [u8; 32],
     pub data_type: u8,

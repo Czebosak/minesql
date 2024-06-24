@@ -1,21 +1,17 @@
-/* use std::fs::File;
-use std::path::Path;
-use std::io::{BufReader, BufRead};
+use std::fs;
+use std::io::Write;
 
-pub fn read_bytes(path, buffer_size) {
-    let file = File::open(&path).unwrap();
+pub fn write_chunks(filename: &str, data: &Vec<u8>) {
+    let mut file = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(filename)
+        .unwrap();
     
-    let mut reader = BufReader::with_capacity(buffer_size, file);
-
-    loop {
-        let buffer = reader.fill_buf()?;
-
-        if buffer.len() == 0 {
-            break;
-        }
-
-        // return buffer;
-        // reader.consume(buffer_length);
-    }
+    file.set_len(0);
+    file.write(data);
 }
- */
+
+pub fn create(filename: &str) {
+    let _ = fs::File::create(filename).unwrap();
+}
