@@ -95,7 +95,14 @@ fn create_new_table() {
 }
 
 fn read_metadata() {
-    let data = fs::read("./sustable.metadata").unwrap();
+    println!("\nEnter table name");
+    print!("> ");
+    stdout().flush().unwrap();
+
+    let mut table_name = String::new();
+    let _ = stdin().read_line(&mut table_name);
+
+    let data = fs::read(format!("{}.metadata", table_name.trim())).unwrap();
 
     let table = deserialize_table(data);
 
