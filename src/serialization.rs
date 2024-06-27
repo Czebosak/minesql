@@ -2,6 +2,7 @@ pub struct Column { // Each column is 37 bytes
     pub name: [u8; 32], // an array of 32 ASCII characters
     pub data_type: u8,
     pub length: u32, // The amount of bytes per line stored in column
+    pub index: u8,
 }
 
 pub struct Table {
@@ -36,6 +37,8 @@ pub fn serialize_table(table: Table) -> Vec<u8> {
         ];
 
         data.extend_from_slice(&split_length);
+
+        data.push(column.index);
     }
 
     return data;
@@ -79,11 +82,14 @@ pub fn deserialize_table(mut data: Vec<u8>) -> Table {
             | ((data_iter.next().unwrap() as u32) << 16)
             | ((data_iter.next().unwrap() as u32) << 8)
             | (data_iter.next().unwrap() as u32);
+        
+        let index = data_iter.next().unwrap();
 
         let column = Column {
             name,
             data_type,
             length,
+            index,
         };
 
         deserialized_table.columns.push(column);
