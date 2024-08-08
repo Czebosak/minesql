@@ -1,7 +1,6 @@
-use std::io::{stdout, stdin, Write};
+use crate::{data, serialization::*};
+use std::io::{Write, stdout, stdin};
 use std::process;
-use std::fs;
-use crate::{data, new_table, serialization::*};
 
 pub fn main_loop() {
     loop {
@@ -18,7 +17,7 @@ pub fn main_loop() {
         println!();
 
         match input.trim() {
-            "1" => create_new_table(),
+            "1" => create_table(),
             "2" => read_metadata(),
             "4" => exit(),
             _ => {}
@@ -26,16 +25,19 @@ pub fn main_loop() {
     }
 }
 
-fn create_new_table() {
+fn get_name() -> String{
     println!("Enter table name");
     print!("> ");
     stdout().flush().unwrap();
 
     let mut name = String::new();
     let _ = stdin().read_line(&mut name).unwrap();
+    return name;
+}
 
+fn column_loop(starting_column_index: u8) -> Vec<Column> {
     let mut columns: Vec<Column> = Vec::new();
-    let mut i = 0;
+    let mut i = starting_column_index;
 
     loop {
         println!("\n1. Create column {}", i);
@@ -91,7 +93,15 @@ fn create_new_table() {
         i += 1;
     }
 
-    new_table(&name.trim(), columns);
+    return columns;
+}
+
+fn create_table() {
+    let name = get_name();
+
+    let columns: Vec<Column> = column_loop(0);
+
+    data::new_table(&name.trim(), columns);
 }
 
 fn read_metadata() {
@@ -102,9 +112,14 @@ fn read_metadata() {
     let mut table_name = String::new();
     let _ = stdin().read_line(&mut table_name);
 
-    let data = fs::read(format!("{}.metadata", table_name.trim())).unwrap();
-
-    let table = deserialize_table(data);
+    let table: Table;
+    match data::get_table_metadata(table_name.trim()) {
+        Ok(r) => {table = r;}
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    };
 
     println!("Table:");
     println!("  Line size: {}B", table.line_size);
@@ -119,6 +134,23 @@ fn read_metadata() {
 
     let mut buf = String::new();
     let _ = stdin().read_line(&mut buf);
+}
+
+fn add_columns() {
+    let name = get_name();
+    let mut table: Table;
+    match data::get_table_metadata(&name) {
+        Ok(r) => {table = r}
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    }
+
+    let columns = column_loop(table.columns.len().try_into().unwrap());
+    for column in columns {
+        table.columns.push(column);
+    }
 }
 
 fn exit() {
