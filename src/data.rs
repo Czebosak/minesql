@@ -24,8 +24,8 @@ pub fn new_table(name: &str, columns: Vec<Column>) {
     }
 
     let table = Table {
-        line_size: line_size,
-        columns: columns,
+        line_size,
+        columns,
     };
 
     let data = serialize_table(table);
