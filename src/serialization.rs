@@ -1,4 +1,4 @@
-pub struct Column { // Each column is 37 bytes
+pub struct Column {
     pub name: [u8; 32], // an array of 32 ASCII characters
     pub data_type: u8,
     pub length: u32, // The amount of bytes per line stored in column
@@ -64,8 +64,10 @@ pub fn deserialize_table(mut data: Vec<u8>) -> Table {
         | (data[2] as u32) << 8
         | (data[3] as u32);
 
-    // Check if there's any data for the remaining columns (each column is 37 bytes)
-    while column_data.len() >= 37 {
+    // Check if there's any data for the remaining columns
+    // The code used to check for exactly the exact size of a Column struct
+    // but I couldn't get it to calculate the correct value without padding
+    while column_data.len() > 0 {
         // Get the name of the column and pass the rest of the data to the remaining_data variable
         let mut name = [0_u8; 32];
         let remaining_data = column_data.split_off(32);
@@ -98,5 +100,5 @@ pub fn deserialize_table(mut data: Vec<u8>) -> Table {
         column_data = data_iter.collect();
     }
 
-    deserialized_table
+    return deserialized_table;
 }
